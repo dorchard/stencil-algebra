@@ -7,6 +7,14 @@ import GHC.Arr
 
 import Control.Comonad
 
+-- Some alises for niceness
+
+current :: Comonad g => g a -> a
+current = extract
+
+promote :: Comonad g => (g a -> b) -> g a -> g b
+promote = extend
+
 {- All containers must have a neighbourhood coalgebra -}
 
 class Neighbourhood g where
@@ -18,7 +26,7 @@ neighbours = (fmap (extract . fst)) . neighbourhood
 
 {- <grid> -}
 
-data Grid i a = Grid (Array i a) i
+data Grid i a = Grid (Array i a) i deriving Show
 
 instance Ix i => Functor (Grid i) where
     fmap f (Grid a i) = Grid (amap f a) i
@@ -43,3 +51,5 @@ instance Neighbourhood (Grid Int) where
 -- Example
 
 localMean g = (sum $ neighbours g) / (fromInteger . toInteger $ length (neighbours g))
+
+foo = promote localMean (Grid (listArray (0 :: Int, 4) [1.0, 4.0, 2.0, 4.0, 1.0]) 0)
